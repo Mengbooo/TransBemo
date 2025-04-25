@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="./assets/images/logo.png" alt="logo" style="width: 100px; /* 可根据需要调整图标宽度 */">
+  <img src="./assets/images/logo.png" alt="logo" style="width: 100px;">
   <h3>TransBemo</h3>
-  <p>A user-friendly and multifunctional translation software with a simple interface, developed on the basis of Expo.</p>
+  <p>A user-friendly and versatile translation software with minimalist pages, developed on the basis of Expo.</p>
 </div>
 
 ### Get started
