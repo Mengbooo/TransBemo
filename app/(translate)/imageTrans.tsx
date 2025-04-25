@@ -1,35 +1,35 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from "react-native";
+import { useState } from "react";
 
-import LanguageSwitcher from '@/components/translate/LanguageSwitcher';
+import TranslateBase from "@/components/global/TranslateBase";
+import OutputTextComponent from "@/components/translate/OutputBox";
+import ImageButtonBox from "@/components/translate/ImageButtonBox";
+import ImageContainer from "@/components/translate/imageContainer";
 
 export default function imageTransPage() {
+  const [inputText, setInputText] = useState("");
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>imageTransPage</Text>
-      <View style={styles.switcherContainer}>
-        <LanguageSwitcher />
+    <TranslateBase>
+      <View style={styles.textContainer}>
+        <OutputTextComponent inputText={inputText}></OutputTextComponent>
+        <ImageContainer></ImageContainer>
+        <ImageButtonBox></ImageButtonBox>
       </View>
-    </View>
+    </TranslateBase>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text:{
+  text: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
-  switcherContainer: {
-    marginTop: 'auto', 
-    marginHorizontal: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    overflow: 'hidden' ,
-    width: '100%', 
+  textContainer: {
+    flex: 1,
+    width: "90%",
+    marginTop: 20,
+    justifyContent: "space-between",
   },
 });

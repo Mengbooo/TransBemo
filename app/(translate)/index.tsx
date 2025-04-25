@@ -1,17 +1,25 @@
-import { View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet, Image, Text, TextInput } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
+import TranslateBase from "@/components/global/TranslateBase";
 import LanguageSwitcher from "@/components/translate/LanguageSwitcher";
+import InputComponent from "@/components/translate/InputBox";
+import OutputTextComponent from "@/components/translate/OutputBox";
 
-import image from "@/assets/images/logo.png";
+import logo from "@/assets/images/logo.png";
+
+import { useState } from "react";
 
 export default function textTransPage() {
+  const [inputText, setInputText] = useState("翻译内容");
+
   return (
-    <View style={styles.container}>
-      <Image source={image} style={styles.image}></Image>
-      <View style={styles.switcherContainer}>
-        <LanguageSwitcher />
+    <TranslateBase>
+      <View style={styles.textContainer}>
+        <InputComponent inputText={inputText} setInputText={setInputText} />
+        <OutputTextComponent inputText={inputText} />
       </View>
-    </View>
+    </TranslateBase>
   );
 }
 
@@ -20,6 +28,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-start",
     alignItems: "center",
+    backgroundColor: "#000000",
   },
   text: {
     fontSize: 20,
@@ -34,10 +43,16 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     width: "100%",
   },
-  image: {
-    width: 50, 
-    height: 50, 
-    resizeMode: 'contain', 
+  logo: {
+    width: 50,
+    height: 50,
+    resizeMode: "contain",
     marginTop: 10,
+  },
+  textContainer: {
+    flex: 1,
+    width: "90%",
+    marginTop: 20,
+    justifyContent: "space-between",
   },
 });

@@ -13,17 +13,15 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 const styles = StyleSheet.create({
   tabBar: {
     marginHorizontal: 20,
-    marginBottom: 20,
-    overflow: 'hidden' ,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    marginBottom: 15,
+    marginTop: 10,
+    overflow: 'hidden',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(0, 0, 0, 0)',
     borderRadius: 10, 
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.55)'
+    borderColor: 'white',
   },
 });
 
@@ -39,15 +37,12 @@ export default function TabLayout() {
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
             ...styles.tabBar
           },
           default: {
             ...styles.tabBar
           }
         }),
-        // 设置为 false 以隐藏标签栏文字
         tabBarShowLabel: false, 
       }}>
       <Tabs.Screen
