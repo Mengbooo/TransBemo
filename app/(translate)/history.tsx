@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import HistoryItem from '@/components/translate/historyItem';
+import HistoryItem from '@/components/translate/HistoryItem';
 import logo from "@/assets/images/logo.png";
 import translateCommonStyles from '@/styles/translateCommonStyles';
 import Entypo from '@expo/vector-icons/Entypo';

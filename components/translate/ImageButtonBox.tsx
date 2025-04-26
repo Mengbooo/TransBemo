@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Button from '../global/Button';
-import SoundWave from '@/components/animation/SoundWave';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 

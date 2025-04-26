@@ -1,12 +1,9 @@
 import { View, StyleSheet, Image, Text, TextInput } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import TranslateBase from "@/components/global/TranslateBase";
-import LanguageSwitcher from "@/components/translate/LanguageSwitcher";
 import InputComponent from "@/components/translate/InputBox";
 import OutputTextComponent from "@/components/translate/OutputBox";
-
-import logo from "@/assets/images/logo.png";
+import TranslateButton from "@/components/translate/TranslateButton";
 
 import { useState } from "react";
 
@@ -18,6 +15,7 @@ export default function textTransPage() {
       <View style={styles.textContainer}>
         <InputComponent inputText={inputText} setInputText={setInputText} />
         <OutputTextComponent inputText={inputText} />
+        <TranslateButton />
       </View>
     </TranslateBase>
   );

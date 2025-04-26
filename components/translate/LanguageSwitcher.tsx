@@ -12,7 +12,18 @@ import {
 import { Colors } from "@/constants/Colors";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
-import {languagesArrayTemp} from "../../constants/Languages";
+// 导入 languagesLabelTemp
+import { languagesLabelTemp } from "../../constants/Languages";
+
+// 辅助函数，根据语言值获取对应的键
+const getLanguageKey = (languageValue: string) => {
+  for (const key in languagesLabelTemp) {
+    if (languagesLabelTemp[key] === languageValue) {
+      return key;
+    }
+  }
+  return null;
+};
 
 const LanguageSwitcher = () => {
   // 管理源语言和目标语言的状态
@@ -24,6 +35,13 @@ const LanguageSwitcher = () => {
   const [isSelectingSource, setIsSelectingSource] = useState(true);
   // 搜索语言的关键词
   const [searchTerm, setSearchTerm] = useState("");
+
+  // 获取源语言和目标语言的 key
+  const sourceLanguageKey = getLanguageKey(sourceLanguage);
+  const targetLanguageKey = getLanguageKey(targetLanguage);
+
+  console.log("sourceLanguageKey:", sourceLanguageKey); // 输出源语言的 key
+  console.log("targetLanguageKey:", targetLanguageKey); // 输出目标语言的 key
 
   // 处理箭头点击事件，交换源语言和目标语言
   const handleSwapLanguages = () => {
@@ -43,8 +61,10 @@ const LanguageSwitcher = () => {
     setSearchTerm("");
   };
 
+  // 获取 languagesLabelTemp 的所有 value
+  const allLanguages = Object.values(languagesLabelTemp);
   // 过滤语言列表，根据搜索关键词
-  const filteredLanguages = languagesArrayTemp.filter((lang) =>
+  const filteredLanguages = allLanguages.filter((lang) =>
     lang.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
