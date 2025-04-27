@@ -4,6 +4,10 @@
   <p>A user-friendly and versatile translation software with minimalist pages, developed on the basis of Expo.</p>
 </div>
 
+### DeepWiki link
+
+https://deepwiki.com/Mengbooo/TransBemo
+
 ### Get started
 
 1. Install dependencies
