@@ -8,14 +8,10 @@ import {
   FlatList,
   TextInput,
 } from "react-native";
-
 import { Colors } from "@/constants/Colors";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { languagesLabelTemp } from "@/constants/Languages";
 
-// 导入 languagesLabelTemp
-import { languagesLabelTemp } from "../../constants/Languages";
-
-// 辅助函数，根据语言值获取对应的键
 const getLanguageKey = (languageValue: string) => {
   for (const key in languagesLabelTemp) {
     if (languagesLabelTemp[key] === languageValue) {
@@ -25,50 +21,43 @@ const getLanguageKey = (languageValue: string) => {
   return null;
 };
 
-const LanguageSwitcher = () => {
-  // 管理源语言和目标语言的状态
-  const [sourceLanguage, setSourceLanguage] = useState("中文");
-  const [targetLanguage, setTargetLanguage] = useState("英语");
-  // 管理语言选择模态框的显示状态
+interface LanguageSwitcherProps {
+  sourceLanguage: string;
+  targetLanguage: string;
+  onLanguageChange: (newSource: string, newTarget: string) => void;
+}
+
+const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
+  sourceLanguage,
+  targetLanguage,
+  onLanguageChange,
+}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  // 标记当前是选择源语言还是目标语言
   const [isSelectingSource, setIsSelectingSource] = useState(true);
-  // 搜索语言的关键词
   const [searchTerm, setSearchTerm] = useState("");
 
-  // 获取源语言和目标语言的 key
-  const sourceLanguageKey = getLanguageKey(sourceLanguage);
-  const targetLanguageKey = getLanguageKey(targetLanguage);
-
-  console.log("sourceLanguageKey:", sourceLanguageKey); // 输出源语言的 key
-  console.log("targetLanguageKey:", targetLanguageKey); // 输出目标语言的 key
-
-  // 处理箭头点击事件，交换源语言和目标语言
   const handleSwapLanguages = () => {
     const temp = sourceLanguage;
-    setSourceLanguage(targetLanguage);
-    setTargetLanguage(temp);
+    const newSource = targetLanguage;
+    const newTarget = temp;
+    onLanguageChange(newSource, newTarget);
   };
 
-  // 处理选择语言的事件
   const handleSelectLanguage = (language: string) => {
     if (isSelectingSource) {
-      setSourceLanguage(language);
+      onLanguageChange(language, targetLanguage);
     } else {
-      setTargetLanguage(language);
+      onLanguageChange(sourceLanguage, language);
     }
     setIsModalVisible(false);
     setSearchTerm("");
   };
 
-  // 获取 languagesLabelTemp 的所有 value
   const allLanguages = Object.values(languagesLabelTemp);
-  // 过滤语言列表，根据搜索关键词
   const filteredLanguages = allLanguages.filter((lang) =>
     lang.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // 渲染语言选择项
   const renderLanguageItem = ({ item }: { item: string }) => (
     <TouchableOpacity
       onPress={() => handleSelectLanguage(item)}
@@ -89,10 +78,7 @@ const LanguageSwitcher = () => {
       >
         <Text style={styles.languageText}>{sourceLanguage}</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={handleSwapLanguages}
-        style={styles.arrowContainer}
-      >
+      <TouchableOpacity onPress={handleSwapLanguages} style={styles.arrowContainer}>
         <FontAwesome5 name="arrows-alt-h" size={24} color="white" />
       </TouchableOpacity>
       <TouchableOpacity
@@ -133,8 +119,7 @@ const LanguageSwitcher = () => {
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 10,
-    marginTop:5,
+    marginTop: 5,
     borderRadius: 10,
     overflow: "hidden",
     flexDirection: "row",
@@ -149,7 +134,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "white",
-    textAlign: "center", 
+    textAlign: "center",
   },
   arrowText: {
     fontSize: 20,
@@ -175,7 +160,7 @@ const styles = StyleSheet.create({
   searchInput: {
     height: 40,
     borderColor: "gray",
-    color: "white", 
+    color: "white",
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,

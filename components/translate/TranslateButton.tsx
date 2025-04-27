@@ -1,13 +1,15 @@
 import React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 
+interface TranslateButtonProps {
+  onPress: () => void;
+}
 
-const TranslateButtonBox: React.FC = () => {
-
+const TranslateButtonBox: React.FC<TranslateButtonProps> = ({ onPress }) => {
   return (
-    <View style={styles.container}>
-        <Text style={styles.text}>翻译</Text>
-    </View>
+    <TouchableOpacity onPress={onPress} style={styles.container}>
+      <Text style={styles.text}>翻译</Text>
+    </TouchableOpacity>
   );
 };
 

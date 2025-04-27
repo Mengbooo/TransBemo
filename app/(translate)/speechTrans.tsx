@@ -4,6 +4,7 @@ import { useState } from "react";
 import TranslateBase from "@/components/global/TranslateBase";
 import OutputTextComponent from "@/components/translate/OutputBox";
 import SpeechButtonBox from "@/components/translate/SpeechButtonBox";
+import LanguageSwitcher from "@/components/translate/LanguageSwitcher";
 
 export default function speechTransPage() {
   const [inputText, setInputText] = useState("");

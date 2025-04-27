@@ -15,9 +15,6 @@ export default function TranslateBase({ children }: TranslateBaseProps) {
     <SafeAreaView style={translateCommonStyles.container}>
       <Image source={logo} style={translateCommonStyles.logo} />
       {children}
-      <View style={translateCommonStyles.switcherContainer}>
-        <LanguageSwitcher />
-      </View>
     </SafeAreaView>
   );
 }

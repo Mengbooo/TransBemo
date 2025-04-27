@@ -6,14 +6,7 @@ const translateCommonStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  switcherContainer: {
-    marginTop: 'auto', 
-    marginHorizontal: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    overflow: 'hidden' ,
-    width: '100%', 
-  },
+
   logo: {
     width: 50, 
     height: 50, 
