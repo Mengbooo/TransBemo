@@ -9,7 +9,7 @@ import { translateTextRequest } from "@/api/textTransRequest";
 import { languagesLabelTemp } from "@/constants/Languages";
 
 export default function textTransPage() {
-  const [inputText, setInputText] = useState("翻译内容");
+  const [inputText, setInputText] = useState("");
   const [outputText, setOutputText] = useState("");
   const [sourceLanguage, setSourceLanguage] = useState("中文");
   const [targetLanguage, setTargetLanguage] = useState("英语");
