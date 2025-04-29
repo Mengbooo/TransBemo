@@ -23,11 +23,13 @@ export default function imageTransPage() {
         <OutputTextComponent inputText={inputText}></OutputTextComponent>
         <ImageContainer></ImageContainer>
         <ImageButtonBox></ImageButtonBox>
-        <LanguageSwitcher
+        <View style={styles.switcherContainer}>
+          <LanguageSwitcher
             sourceLanguage={sourceLanguage}
             targetLanguage={targetLanguage}
             onLanguageChange={handleLanguageChange}
           />
+        </View>
       </View>
     </TranslateBase>
   );
@@ -44,5 +46,11 @@ const styles = StyleSheet.create({
     width: "90%",
     marginTop: 20,
     justifyContent: "space-between",
+  },
+  switcherContainer: {
+    marginTop: "auto",
+    paddingVertical: 5,
+    overflow: "hidden",
+    width: "100%",
   },
 });
