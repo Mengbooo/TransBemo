@@ -2,6 +2,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { useState } from "react";
 
 import TranslateBase from "@/components/global/TranslateBase";
+import InputComponent from "@/components/translate/InputBox";
 import OutputTextComponent from "@/components/translate/OutputBox";
 import SpeechButtonBox from "@/components/translate/SpeechButtonBox";
 import LanguageSwitcher from "@/components/translate/LanguageSwitcher";
@@ -19,6 +20,7 @@ export default function speechTransPage() {
   return (
     <TranslateBase>
       <View style={styles.textContainer}>
+        <InputComponent inputText={inputText} setInputText={setInputText}  ></InputComponent>
         <OutputTextComponent inputText={inputText}></OutputTextComponent>
         <SpeechButtonBox></SpeechButtonBox>
         <View style={styles.switcherContainer}>

@@ -1,5 +1,5 @@
-import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import React, { useState, useRef } from "react";
+import { Pressable, StyleSheet, View, Animated } from "react-native";
 import type { PressableProps } from "react-native";
 
 // 定义组件的属性类型
@@ -9,10 +9,49 @@ type ButtonProps = PressableProps & {
   onPressOut?: () => void;
 };
 
-const Button: React.FC<ButtonProps> = ({ icon }) => {
+const Button: React.FC<ButtonProps> = ({ 
+  icon, 
+  onPressIn, 
+  onPressOut, 
+  ...rest 
+}) => {
+  const animatedValue = useRef(new Animated.Value(0)).current;
+
+  const backgroundColor = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['transparent', 'black']
+  });
+
+  const handlePressIn = () => {
+    Animated.timing(animatedValue, {
+      toValue: 1,
+      duration: 100,
+      useNativeDriver: false
+    }).start();
+    onPressIn && onPressIn();
+  };
+
+  const handlePressOut = () => {
+    Animated.timing(animatedValue, {
+      toValue: 0,
+      duration: 100,
+      useNativeDriver: false
+    }).start();
+    onPressOut && onPressOut();
+  };
+
   return (
-    <Pressable style={styles.button}>
-      <View style={styles.iconContainer}>{icon}</View>
+    <Pressable 
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      {...rest}
+    >
+      <Animated.View style={[
+        styles.button, 
+        { backgroundColor }
+      ]}>
+        <View style={styles.iconContainer}>{icon}</View>
+      </Animated.View>
     </Pressable>
   );
 };
