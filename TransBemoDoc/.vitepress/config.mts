@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
+  base: '/',
   title: 'TransBemo 文档',
   description: 'TransBemo 项目文档',
   lang: 'zh-CN',

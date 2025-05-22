@@ -1,3 +1,24 @@
+# TransBemo 文档站点
+
+## 欢迎使用 TransBemo 文档
+
+TransBemo 是一个现代化的多语言翻译应用，提供高效、准确的语音和文本翻译服务。
+
+### 文档导航
+
+- [开发文档](/dev-CN.md)
+- [语音翻译 API](/speechTransAPI.md)
+- [文本翻译 API](/textTransAPI.md)
+
+### 快速链接
+
+- [GitHub 仓库](https://github.com/mengbooo/TransBemo)
+- [项目主页](https://github.com/mengbooo/TransBemo)
+
+### 关于本项目
+
+TransBemo 致力于提供跨平台、易用的翻译解决方案，支持多种语言和翻译方式。
+
 ---
 layout: home
 
