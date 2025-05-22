@@ -1,8 +1,0 @@
-{
-  "buildCommand": "npm run docs:build",
-  "outputDirectory": ".vitepress/dist",
-  "framework": "vitepress",
-  "routes": [
-    { "src": "/(.*)", "dest": "/$1" }
-  ]
-} 
