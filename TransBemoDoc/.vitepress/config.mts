@@ -6,28 +6,28 @@ export default defineConfig({
   lang: 'zh-CN',
   themeConfig: {
     nav: [
-      { text: '首页', link: '/' },
-      { text: 'API 文档', link: '/speechTransAPI' },
-      { text: '开发文档', link: '/dev-CN' }
+      { text: '首页', link: './index.md' },
+      { text: 'API 文档', link: './speechTransAPI.md' },
+      { text: '开发文档', link: './dev-CN.md' }
     ],
     sidebar: [
       {
         text: 'API 文档',
         items: [
-          { text: '语音翻译 API', link: '/speechTransAPI' },
-          { text: '文本翻译 API', link: '/textTransAPI' }
+          { text: '语音翻译 API', link: './speechTransAPI.md' },
+          { text: '文本翻译 API', link: './textTransAPI.md' }
         ]
       },
       {
         text: '开发文档',
         items: [
-          { text: '中文开发文档', link: '/dev-CN' },
-          { text: '英文开发文档', link: '/dev' }
+          { text: '开发文档', link: './dev-CN.md' },
+          { text: '架构分析与总览', link: './dev.md' }
         ]
       }
     ],
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/yourusername/TransBemo' }
+      { icon: 'github', link: 'https://github.com/mengbooo/TransBemo' }
     ]
   }
 })
