@@ -14,12 +14,13 @@
   "jest": {
     "preset": "jest-expo"
   },
+  "proxy": "http://localhost:5000",
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
-    "axios": "^1.9.0",
+    "axios": "^1.6.2",
     "expo": "~52.0.46",
     "expo-asset": "^11.0.5",
     "expo-av": "~15.0.2",

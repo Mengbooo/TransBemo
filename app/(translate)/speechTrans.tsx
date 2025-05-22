@@ -9,6 +9,7 @@ import LanguageSwitcher from "@/components/translate/LanguageSwitcher";
 
 export default function speechTransPage() {
   const [inputText, setInputText] = useState("");
+  const [outputText, setOutputText] = useState("");
   const [sourceLanguage, setSourceLanguage] = useState("中文");
   const [targetLanguage, setTargetLanguage] = useState("英语");
 
@@ -17,12 +18,26 @@ export default function speechTransPage() {
     setTargetLanguage(newTarget);
   };
 
+  const handleSpeechTranslate = (source: string, target: string) => {
+    setInputText(source);
+    setOutputText(target);
+  };
+
   return (
     <TranslateBase>
       <View style={styles.textContainer}>
-        <InputComponent inputText={inputText} setInputText={setInputText}  ></InputComponent>
-        <OutputTextComponent inputText={inputText}></OutputTextComponent>
-        <SpeechButtonBox></SpeechButtonBox>
+        <InputComponent 
+          inputText={inputText} 
+          setInputText={setInputText}
+        />
+        <OutputTextComponent 
+          inputText={outputText}
+        />
+        <SpeechButtonBox
+          onTranslate={handleSpeechTranslate}
+          sourceLanguage={sourceLanguage}
+          targetLanguage={targetLanguage}
+        />
         <View style={styles.switcherContainer}>
           <LanguageSwitcher
             sourceLanguage={sourceLanguage}
