@@ -4,68 +4,29 @@ import InputComponent from "@/components/translate/InputBox";
 import OutputTextComponent from "@/components/translate/OutputBox";
 import TranslateButton from "@/components/translate/TranslateButton";
 import LanguageSwitcher from "@/components/translate/LanguageSwitcher";
-import { useState } from "react";
-import { translateTextRequest } from "@/api/textTransRequest";
-import { languagesLabelTemp } from "@/constants/Languages";
+import { useTranslateStore } from "@/store/translateStore";
 
 export default function textTransPage() {
-  const [inputText, setInputText] = useState("翻译内容");
-  const [outputText, setOutputText] = useState("");
-  const [sourceLanguage, setSourceLanguage] = useState("中文");
-  const [targetLanguage, setTargetLanguage] = useState("英语");
-
-  const getLanguageKey = (languageValue: string) => {
-    for (const key in languagesLabelTemp) {
-      if (languagesLabelTemp[key] === languageValue) {
-        return key;
-      }
-    }
-    return null;
-  };
-
-  const sourceLanguageKey = getLanguageKey(sourceLanguage) as string;
-  const targetLanguageKey = getLanguageKey(targetLanguage) as string;
-
-  const handleTranslate = async () => {
-    try {
-      const params = {
-        q: inputText,
-        from: sourceLanguageKey,
-        to: targetLanguageKey,
-      };
-      const result = await translateTextRequest(
-        params.q,
-        params.from,
-        params.to
-      );
-      console.log("翻译结果1:", result);
-      console.log("翻译结果2:", result.data.trans_result[0].dst);
-
-      if (result.data.trans_result[0].dst) {
-        setOutputText(result.data.trans_result[0].dst);
-      }
-      
-    } catch (error) {
-      console.error("翻译失败:", error);
-    }
-  };
-
-  const handleLanguageChange = (newSource: string, newTarget: string) => {
-    setSourceLanguage(newSource);
-    setTargetLanguage(newTarget);
-  };
+  const {
+    textTranslate,
+    setTextInputText,
+    handleTextLanguageChange,
+    translateText
+  } = useTranslateStore();
+  
+  const { inputText, outputText, sourceLanguage, targetLanguage } = textTranslate;
 
   return (
     <TranslateBase>
       <View style={styles.textContainer}>
-        <InputComponent inputText={inputText} setInputText={setInputText} />
+        <InputComponent inputText={inputText} setInputText={setTextInputText} />
         <OutputTextComponent inputText={outputText} />
-        <TranslateButton onPress={handleTranslate} />
+        <TranslateButton onPress={translateText} />
         <View style={styles.switcherContainer}>
           <LanguageSwitcher
             sourceLanguage={sourceLanguage}
             targetLanguage={targetLanguage}
-            onLanguageChange={handleLanguageChange}
+            onLanguageChange={handleTextLanguageChange}
           />
         </View>
       </View>

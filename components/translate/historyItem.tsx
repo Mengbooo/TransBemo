@@ -7,7 +7,27 @@ type HistoryItemProps = {
   targetLanguage: string;
   inputText: string;
   outputText: string;
-  translationMethod:ReactNode;
+  translationMethod: ReactNode;
+  timestamp?: number; // 添加可选的时间戳属性
+};
+
+// 格式化时间戳
+const formatTimestamp = (timestamp?: number): string => {
+  if (!timestamp) return '';
+  
+  const date = new Date(timestamp);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  // 判断是今天、昨天还是更早
+  if (date.toDateString() === today.toDateString()) {
+    return `今天 ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  } else if (date.toDateString() === yesterday.toDateString()) {
+    return `昨天 ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  } else {
+    return `${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  }
 };
 
 const HistoryItem: React.FC<HistoryItemProps> = ({
@@ -16,7 +36,10 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
   inputText,
   outputText,
   translationMethod,
+  timestamp,
 }) => {
+  const formattedTime = formatTimestamp(timestamp);
+  
   return (
     <View style={styles.container}>
       <View style={styles.Info}>
@@ -34,6 +57,9 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
         <View style={styles.separator} />
         <Text style={styles.content}>{outputText}</Text>
       </View>
+      {timestamp && (
+        <Text style={styles.timestamp}>{formattedTime}</Text>
+      )}
     </View>
   );
 };
@@ -79,6 +105,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "flex-start",
     justifyContent: "flex-start",
+    width: '100%',
   },
   separator: {
     width: '100%', // 分割线宽度占满父容器
@@ -86,6 +113,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#52525b', // 分割线颜色
     marginVertical: 5, // 分割线上下的外边距
   },
+  timestamp: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.5)',
+    alignSelf: 'flex-end',
+    marginTop: 8,
+  }
 });
 
 export default HistoryItem;

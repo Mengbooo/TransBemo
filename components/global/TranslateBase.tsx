@@ -1,7 +1,7 @@
 import { View, Image } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import LanguageSwitcher from '@/components/translate/LanguageSwitcher';
+import Logo from "@/components/global/Logo";
 
 import logo from "@/assets/images/logo.png";
 import translateCommonStyles from '@/styles/translateCommonStyles';
@@ -13,7 +13,7 @@ interface TranslateBaseProps {
 export default function TranslateBase({ children }: TranslateBaseProps) {
   return (
     <SafeAreaView style={translateCommonStyles.container}>
-      <Image source={logo} style={translateCommonStyles.logo} />
+      <Logo style={translateCommonStyles.logo} />
       {children}
     </SafeAreaView>
   );

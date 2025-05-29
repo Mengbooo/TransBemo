@@ -6,8 +6,8 @@ const InputComponent = ({ inputText, setInputText }: { inputText: string; setInp
         style={styles.textBox}
         value={inputText}
         onChangeText={(text) => setInputText(text)}
-        placeholder="输入文本"
-        placeholderTextColor="white"
+        placeholder="翻译内容"
+        placeholderTextColor="grey"
         multiline
         numberOfLines={4}
       />
