@@ -1,7 +1,7 @@
-import express from "express";
-import axios from "axios";
-import md5 from "md5";
-import dotenv from "dotenv";
+const express = require("express");
+const axios = require("axios");
+const md5 = require("md5");
+const dotenv = require("dotenv");
 
 dotenv.config();
 
@@ -34,9 +34,6 @@ router.post("/translateText", async (req, res) => {
     const signStr = appid + q + salt + appkey;
     const sign = md5(signStr).toLowerCase();
 
-    // console.log("sign:", sign);
-    // console.log("signStr:", signStr);
-
     // 构建请求参数
     const requestParams = {
       q,
@@ -55,14 +52,12 @@ router.post("/translateText", async (req, res) => {
       }
     }
     
-    // console.log("q:", q);
     console.log("encodedParams:", encodedParams.toString());
 
     const translateURL =
       "https://fanyi-api.baidu.com/api/trans/vip/translate?" +
       encodedParams.toString();
 
-    // console.log("translateURL:", translateURL);
     // 调用百度翻译 API
     const response = await axios.post(translateURL, {
       headers: {
@@ -76,4 +71,4 @@ router.post("/translateText", async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;
