@@ -1,7 +1,7 @@
-const express = require("express");
-const axios = require("axios");
-const md5 = require("md5");
-const dotenv = require("dotenv");
+import express from "express";
+import axios from "axios";
+import md5 from "md5";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -71,4 +71,4 @@ router.post("/translateText", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

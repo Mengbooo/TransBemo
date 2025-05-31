@@ -1,30 +1,58 @@
 import React from "react";
-import { TextInput, StyleSheet, View, Text } from "react-native";
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { useTranslateStore } from "@/store/translateStore";
 
 interface SpeechInputProps {
-  inputText: string;
-  setInputText: (text: string) => void;
-  placeholder?: string;
+  speechText: string;
+  recordingStatus: 'idle' | 'recording' | 'processing';
 }
 
 const SpeechInput: React.FC<SpeechInputProps> = ({ 
-  inputText, 
-  setInputText,
-  placeholder = "语音识别内容将显示在这里..." 
+  speechText, 
+  recordingStatus 
 }) => {
+  const { 
+    speechTranslate,
+    playOriginalAudio 
+  } = useTranslateStore();
+
+  const { audioUri } = speechTranslate;
+  
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.textBox}
-        value={inputText}
-        onChangeText={(text) => setInputText(text)}
-        placeholder={placeholder}
-        placeholderTextColor="grey"
-        multiline
-        numberOfLines={3}
-        editable={true} // 允许手动编辑
-      />
+      {recordingStatus === 'recording' ? (
+        <View style={styles.recordingContainer}>
+          <ActivityIndicator size="small" color="#FF4A4A" />
+          <Text style={styles.recordingText}>正在录音...</Text>
+        </View>
+      ) : recordingStatus === 'processing' ? (
+        <View style={styles.processingContainer}>
+          <ActivityIndicator size="small" color="white" />
+          <Text style={styles.processingText}>正在处理语音...</Text>
+        </View>
+      ) : speechText ? (
+        <View style={styles.contentContainer}>
+          <Text style={styles.text}>{speechText}</Text>
+          
+          {audioUri && (
+            <>
+              <View style={styles.divider} />
+              <TouchableOpacity 
+                style={styles.playButton} 
+                onPress={playOriginalAudio}
+              >
+                <FontAwesome5 name="play-circle" size={20} color="rgba(255, 255, 255, 0.7)" />
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+      ) : (
+        <View style={styles.placeholderContainer}>
+          <FontAwesome5 name="microphone" size={24} color="rgba(255, 255, 255, 0.5)" />
+          <Text style={styles.placeholder}>点击下方按钮开始录音</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -32,25 +60,66 @@ const SpeechInput: React.FC<SpeechInputProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginVertical: 5,
-  },
-  label: {
-    color: 'white',
-    fontSize: 16,
-    marginLeft: 8,
-    fontWeight: '500',
-  },
-  textBox: {
-    flex: 1,
     borderWidth: 1,
-    borderColor: 'white',
+    borderColor: "white",
     borderRadius: 10,
     padding: 10,
-    color: 'white',
-    fontSize: 18,
-    textAlignVertical: 'top',
-    textAlign: 'left',
-    backgroundColor: 'rgba(255, 255, 255, 0)', // 稍微明显一点的背景
+    marginVertical: 5,
+    justifyContent: "center",
+    minHeight: 100,
+  },
+  contentContainer: {
+    flex: 1,
+    position: "relative",
+  },
+  text: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "left",
+    marginBottom: 25, // 为播放按钮留出空间
+  },
+  placeholderContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  placeholder: {
+    color: "rgba(255, 255, 255, 0.5)",
+    marginTop: 10,
+    textAlign: "center",
+  },
+  recordingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  recordingText: {
+    color: "#FF4A4A",
+    marginLeft: 10,
+    fontWeight: "bold",
+  },
+  processingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  processingText: {
+    color: "white",
+    marginLeft: 10,
+  },
+  divider: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    marginBottom: 30,
+  },
+  playButton: {
+    position: "absolute",
+    bottom: 5,
+    left: 5,
+    padding: 3,
   },
 });
 

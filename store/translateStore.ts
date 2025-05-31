@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import { translateTextRequest } from '@/api/textTransRequest';
+import { translateImageRequest } from '@/api/imageTransRequest';
+import { translateSpeechRequest } from '@/api/speechTransRequest';
 import { languagesLabelTemp } from '@/constants/Languages';
+import { pickImageFromLibrary, captureImageWithCamera, uriToBlob } from '@/utils/imageUtils';
+import { startRecording, stopRecording, audioToBase64, playAudio, isRecordingSupported } from '@/utils/audioUtils';
+import { Audio } from 'expo-av';
+import { Platform } from 'react-native';
 
 type TranslationType = 'text' | 'image' | 'speech';
 
@@ -24,6 +30,9 @@ interface ImageTranslateState extends BaseTranslateState {
 // 语音翻译状态
 interface SpeechTranslateState extends BaseTranslateState {
   speechText: string;
+  recordingStatus: 'idle' | 'recording' | 'processing';
+  audioUri: string | null;
+  targetAudioBase64: string | null;
 }
 
 // 翻译历史记录项
@@ -61,6 +70,8 @@ type TranslateState = {
   setImageTargetLanguage: (lang: string) => void;
   handleImageLanguageChange: (newSource: string, newTarget: string) => void;
   translateImage: (imageUri: string) => Promise<void>;
+  pickAndTranslateImage: () => Promise<void>;
+  captureAndTranslateImage: () => Promise<void>;
   
   // 语音翻译方法
   setSpeechText: (text: string) => void;
@@ -68,7 +79,14 @@ type TranslateState = {
   setSpeechSourceLanguage: (lang: string) => void;
   setSpeechTargetLanguage: (lang: string) => void;
   handleSpeechLanguageChange: (newSource: string, newTarget: string) => void;
-  translateSpeech: (speechText: string) => Promise<void>;
+  setRecordingStatus: (status: 'idle' | 'recording' | 'processing') => void;
+  setAudioUri: (uri: string | null) => void;
+  setTargetAudioBase64: (base64: string | null) => void;
+  startSpeechRecording: () => Promise<void>;
+  stopSpeechRecording: () => Promise<void>;
+  translateSpeech: (audioUri: string) => Promise<void>;
+  playOriginalAudio: () => Promise<void>;
+  playTranslatedAudio: () => Promise<void>;
   
   // 通用方法
   getLanguageKey: (languageValue: string) => string | null;
@@ -96,6 +114,9 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     outputText: '',
     sourceLanguage: '中文',
     targetLanguage: '英语',
+    recordingStatus: 'idle',
+    audioUri: null,
+    targetAudioBase64: null,
   },
   
   translationHistory: [],
@@ -175,17 +196,173 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     }
   })),
   
-  // 通用方法
-  getLanguageKey: (languageValue) => {
-    for (const key in languagesLabelTemp) {
-      if (languagesLabelTemp[key] === languageValue) {
-        return key;
-      }
+  setRecordingStatus: (status) => set((state) => ({
+    speechTranslate: { ...state.speechTranslate, recordingStatus: status }
+  })),
+  
+  setAudioUri: (uri) => set((state) => ({
+    speechTranslate: { ...state.speechTranslate, audioUri: uri }
+  })),
+  
+  setTargetAudioBase64: (base64) => set((state) => ({
+    speechTranslate: { ...state.speechTranslate, targetAudioBase64: base64 }
+  })),
+  
+  startSpeechRecording: async () => {
+    const { setRecordingStatus } = get();
+    
+    // 检查平台是否支持录音
+    if (Platform.OS === 'web') {
+      console.warn('Web平台暂不支持录音功能');
+      return;
     }
-    return null;
+    
+    // 设置录音状态
+    setRecordingStatus('recording');
+    
+    // 开始录音
+    await startRecording();
   },
   
-  // 翻译功能
+  stopSpeechRecording: async () => {
+    const { setRecordingStatus, setAudioUri, translateSpeech } = get();
+    
+    // 检查平台是否支持录音
+    if (Platform.OS === 'web') {
+      console.warn('Web平台暂不支持录音功能');
+      return;
+    }
+    
+    // 设置处理状态
+    setRecordingStatus('processing');
+    
+    // 停止录音
+    const audioUri = await stopRecording();
+    
+    if (audioUri) {
+      // 保存录音URI
+      setAudioUri(audioUri);
+      
+      // 翻译录音
+      await translateSpeech(audioUri);
+    }
+    
+    // 重置状态为空闲
+    setRecordingStatus('idle');
+  },
+  
+  translateSpeech: async (audioUri) => {
+    try {
+      // 检查平台是否支持
+      if (Platform.OS === 'web') {
+        console.warn('Web平台暂不支持语音翻译功能');
+        return;
+      }
+      
+      const { 
+        speechTranslate, 
+        setSpeechText, 
+        setSpeechOutputText, 
+        setTargetAudioBase64,
+        getLanguageKey,
+        addToHistory
+      } = get();
+      
+      const { sourceLanguage, targetLanguage } = speechTranslate;
+      
+      // 转换语言代码
+      const fromLang = getLanguageKey(sourceLanguage) || 'zh';
+      const toLang = getLanguageKey(targetLanguage) || 'en';
+      
+      // 将音频转为Base64
+      const base64Audio = await audioToBase64(audioUri);
+      
+      if (!base64Audio) {
+        console.error('音频转Base64失败');
+        return;
+      }
+      
+      // 获取音频格式
+      const format = audioUri.endsWith('.wav') ? 'wav' 
+                   : audioUri.endsWith('.amr') ? 'amr' 
+                   : audioUri.endsWith('.m4a') ? 'm4a' 
+                   : 'pcm';
+      
+      // 发送语音翻译请求
+      const response = await translateSpeechRequest(base64Audio, fromLang, toLang, format);
+      
+      if (response && response.code === 0) {
+        const { source, target, target_tts } = response.data;
+        
+        // 更新语音识别文本和翻译结果
+        setSpeechText(source);
+        setSpeechOutputText(target);
+        setTargetAudioBase64(target_tts);
+        
+        // 添加到历史记录
+        addToHistory({
+          source: sourceLanguage,
+          target: targetLanguage,
+          inputText: source,
+          outputText: target,
+          type: 'speech'
+        });
+      } else {
+        console.error('语音翻译失败:', response?.msg || '未知错误');
+      }
+    } catch (error) {
+      console.error('语音翻译错误:', error);
+    }
+  },
+  
+  playOriginalAudio: async () => {
+    try {
+      const { speechTranslate } = get();
+      
+      if (speechTranslate.audioUri) {
+        await playAudio(speechTranslate.audioUri);
+      }
+    } catch (error) {
+      console.error('播放原始音频失败:', error);
+    }
+  },
+  
+  playTranslatedAudio: async () => {
+    try {
+      const { speechTranslate } = get();
+      
+      if (speechTranslate.targetAudioBase64) {
+        await playAudio(speechTranslate.targetAudioBase64, true);
+      }
+    } catch (error) {
+      console.error('播放翻译音频失败:', error);
+    }
+  },
+  
+  // 从相册选择图片并翻译
+  pickAndTranslateImage: async () => {
+    try {
+      const result = await pickImageFromLibrary();
+      if (result && result.uri) {
+        await get().translateImage(result.uri);
+      }
+    } catch (error) {
+      console.error('选择并翻译图片失败:', error);
+    }
+  },
+  
+  // 拍摄照片并翻译
+  captureAndTranslateImage: async () => {
+    try {
+      const result = await captureImageWithCamera();
+      if (result && result.uri) {
+        await get().translateImage(result.uri);
+      }
+    } catch (error) {
+      console.error('拍摄并翻译图片失败:', error);
+    }
+  },
+  
   translateText: async () => {
     try {
       const { textTranslate, getLanguageKey } = get();
@@ -230,57 +407,45 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     try {
       const { imageTranslate, getLanguageKey } = get();
       const { sourceLanguage, targetLanguage } = imageTranslate;
+
+      if (!imageUri) {
+        console.error('图片URI不能为空');
+        return;
+      }
       
-      // 图片翻译功能将在后续实现
-      // 目前只是保存图片URI并模拟翻译结果
+      // 设置加载状态
       set((state) => ({
         imageTranslate: { 
           ...state.imageTranslate, 
           imageUri,
-          outputText: "这是图片翻译的示例结果" // 模拟翻译结果
+          outputText: "正在翻译中..." // 设置加载提示
         }
       }));
-      
-      // 添加到历史记录
-      get().addToHistory({
-        source: sourceLanguage,
-        target: targetLanguage,
-        inputText: `图片: ${imageUri.substring(0, 30)}...`,
-        outputText: "这是图片翻译的示例结果",
-        type: 'image'
-      });
-    } catch (error) {
-      console.error('图片翻译失败:', error);
-    }
-  },
-  
-  translateSpeech: async (speechText) => {
-    try {
-      const { speechTranslate, getLanguageKey } = get();
-      const { sourceLanguage, targetLanguage } = speechTranslate;
-      
-      if (!speechText.trim()) {
-        console.error('语音文本不能为空');
-        return;
-      }
       
       const sourceLanguageKey = getLanguageKey(sourceLanguage) as string;
       const targetLanguageKey = getLanguageKey(targetLanguage) as string;
       
-      const result = await translateTextRequest(
-        speechText,
+      // 将图片URI转换为Blob
+      const imageBlob = await uriToBlob(imageUri);
+      
+      // 调用图片翻译API
+      const result = await translateImageRequest(
+        imageBlob,
         sourceLanguageKey,
-        targetLanguageKey
+        targetLanguageKey,
+        1 // 使用整图贴合模式
       );
       
-      if (result.data.trans_result && result.data.trans_result[0].dst) {
-        const translatedText = result.data.trans_result[0].dst;
+      if (result.data.error_code === "0" && result.data.data) {
+        // 获取翻译结果
+        const { sumSrc, sumDst, pasteImg } = result.data.data;
         
         set((state) => ({
-          speechTranslate: { 
-            ...state.speechTranslate, 
-            speechText,
-            outputText: translatedText 
+          imageTranslate: { 
+            ...state.imageTranslate, 
+            outputText: sumDst,
+            // 如果有贴合图片，可以保存
+            // pasteImgBase64: pasteImg
           }
         }));
         
@@ -288,14 +453,40 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
         get().addToHistory({
           source: sourceLanguage,
           target: targetLanguage,
-          inputText: speechText,
-          outputText: translatedText,
-          type: 'speech'
+          inputText: sumSrc || `图片: ${imageUri.substring(0, 30)}...`,
+          outputText: sumDst,
+          type: 'image'
         });
+      } else {
+        // 处理错误
+        const errorMessage = result.data.error_msg || "图片翻译失败";
+        set((state) => ({
+          imageTranslate: { 
+            ...state.imageTranslate, 
+            outputText: `错误: ${errorMessage}`
+          }
+        }));
+        console.error('图片翻译返回错误:', result.data);
       }
     } catch (error) {
-      console.error('语音翻译失败:', error);
+      console.error('图片翻译失败:', error);
+      set((state) => ({
+        imageTranslate: { 
+          ...state.imageTranslate, 
+          outputText: "翻译过程中出现错误，请重试"
+        }
+      }));
     }
+  },
+  
+  // 通用方法
+  getLanguageKey: (languageValue) => {
+    for (const key in languagesLabelTemp) {
+      if (languagesLabelTemp[key] === languageValue) {
+        return key;
+      }
+    }
+    return null;
   },
   
   addToHistory: (item) => set((state) => ({

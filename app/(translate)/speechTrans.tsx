@@ -1,42 +1,58 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import TranslateBase from "@/components/global/TranslateBase";
-import SpeechInput from "@/components/translate/SpeechInput";
 import OutputTextComponent from "@/components/translate/OutputBox";
 import SpeechButtonBox from "@/components/translate/SpeechButtonBox";
+import SpeechInput from "@/components/translate/SpeechInput";
 import LanguageSwitcher from "@/components/translate/LanguageSwitcher";
 import { useTranslateStore } from "@/store/translateStore";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
-export default function speechTransPage() {
+export default function SpeechTransPage() {
   const {
     speechTranslate,
-    setSpeechText,
-    translateSpeech,
-    handleSpeechLanguageChange
+    handleSpeechLanguageChange,
+    playTranslatedAudio
   } = useTranslateStore();
   
-  const { speechText, outputText, sourceLanguage, targetLanguage } = speechTranslate;
-
-  // 这个函数将在实现语音识别功能后调用
-  const handleSpeechRecognized = (text: string) => {
-    setSpeechText(text);
-    translateSpeech(text);
-  };
+  const { 
+    speechText,
+    outputText, 
+    sourceLanguage, 
+    targetLanguage, 
+    recordingStatus,
+    targetAudioBase64
+  } = speechTranslate;
 
   return (
     <TranslateBase>
-      <View style={styles.textContainer}>
-        <SpeechInput 
-          inputText={speechText} 
-          setInputText={setSpeechText} 
-        />
-        <OutputTextComponent inputText={outputText} />
-        <SpeechButtonBox onSpeechRecognized={handleSpeechRecognized} />
-        <View style={styles.switcherContainer}>
-          <LanguageSwitcher
-            sourceLanguage={sourceLanguage}
-            targetLanguage={targetLanguage}
-            onLanguageChange={handleSpeechLanguageChange}
+      <View style={styles.container}>
+        <View style={styles.textContainer}>
+          <SpeechInput 
+            speechText={speechText} 
+            recordingStatus={recordingStatus} 
           />
+          
+          <OutputTextComponent inputText={outputText} />
+          
+          {targetAudioBase64 && (
+            <TouchableOpacity 
+              style={styles.translatedAudioButton} 
+              onPress={playTranslatedAudio}
+            >
+              <FontAwesome5 name="play" size={18} color="white" />
+              <Text style={styles.audioButtonText}>播放译文语音</Text>
+            </TouchableOpacity>
+          )}
+          
+          <SpeechButtonBox />
+          
+          <View style={styles.switcherContainer}>
+            <LanguageSwitcher
+              sourceLanguage={sourceLanguage}
+              targetLanguage={targetLanguage}
+              onLanguageChange={handleSpeechLanguageChange}
+            />
+          </View>
         </View>
       </View>
     </TranslateBase>
@@ -44,10 +60,10 @@ export default function speechTransPage() {
 }
 
 const styles = StyleSheet.create({
-  text: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
+  container: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
   },
   textContainer: {
     flex: 1,
@@ -60,5 +76,20 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     overflow: "hidden",
     width: "100%",
+  },
+  translatedAudioButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "center",
+    marginVertical: 5,
+  },
+  audioButtonText: {
+    color: "white",
+    marginLeft: 8,
+    fontWeight: "500",
   },
 });

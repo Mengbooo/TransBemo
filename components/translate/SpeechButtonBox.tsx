@@ -1,100 +1,77 @@
-import React, { useRef, useState } from 'react';
-import { View, StyleSheet, Animated, Easing, Text } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Alert, Text, Platform } from 'react-native';
 import Button from '../global/Button';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { useTranslateStore } from '@/store/translateStore';
 
-interface SpeechButtonBoxProps {
-  onSpeechRecognized?: (text: string) => void;
-}
+const SpeechButtonBox: React.FC = () => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  const { 
+    speechTranslate,
+    startSpeechRecording,
+    stopSpeechRecording
+  } = useTranslateStore();
 
-const SpeechButtonBox: React.FC<SpeechButtonBoxProps> = ({ onSpeechRecognized }) => {
-  const MicrophoneIcon = <FontAwesome5 name="microphone" size={24} color="white" />;
-  const [isPressed, setIsPressed] = useState(false);
-  const animatedValue = useRef(new Animated.Value(0)).current;
-  
-  // 计算背景颜色的插值
-  const backgroundColor = animatedValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['rgba(0, 0, 0, 0)', 'rgb(255, 255, 255)']
-  });
-  
-  const handlePress = () => {
-    // 这里将来会集成语音识别功能
-    // 暂时模拟识别结果
-    if (onSpeechRecognized) {
-      onSpeechRecognized("语音识别测试文本");
+  const { recordingStatus } = speechTranslate;
+
+  const handleRecordPress = async () => {
+    try {
+      if (recordingStatus === 'idle') {
+        setIsRecording(true);
+        await startSpeechRecording();
+      } else if (recordingStatus === 'recording') {
+        setIsRecording(false);
+        setIsProcessing(true);
+        await stopSpeechRecording();
+      }
+    } catch (error) {
+      Alert.alert('错误', '录音处理失败: ' + (error as Error).message);
+    } finally {
+      setIsProcessing(false);
     }
   };
+
+  const MicrophoneIcon = <FontAwesome5 name="microphone" size={24} color="white" />;
+  const StopIcon = <FontAwesome5 name="stop-circle" size={24} color="white" />;
   
-  const handlePressIn = () => {
-    setIsPressed(true);
-    // 启动渐变动画：透明到白色
-    Animated.timing(animatedValue, {
-      toValue: 1,
-      duration: 300,
-      easing: Easing.ease,
-      useNativeDriver: false, // 背景色动画不能使用原生驱动
-    }).start();
-  };
-  
-  const handlePressOut = () => {
-    setIsPressed(false);
-    // 启动渐变动画：白色到透明
-    Animated.timing(animatedValue, {
-      toValue: 0,
-      duration: 300,
-      easing: Easing.ease,
-      useNativeDriver: false, // 背景色动画不能使用原生驱动
-    }).start();
-  };
-  
-  // 自定义按钮样式
-  const customButtonStyle = {
-    backgroundColor: isPressed ? 'black' : 'transparent',
-  };
-  
+  // 检查是否是Web平台
+  const isWeb = Platform.OS === 'web';
+
   return (
-    <View style={styles.outerContainer}>
-      <Animated.View 
-        style={[
-          styles.container,
-          { backgroundColor }
-        ]}
-      >
+    <View style={styles.container}>
+      {isWeb ? (
+        <Text style={styles.webUnsupportedText}>
+          浏览器暂不支持语音录制功能，请使用移动应用
+        </Text>
+      ) : (
         <Button
-          icon={MicrophoneIcon}
-          onPress={handlePress}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          isPressed={isPressed}
-          buttonStyle={customButtonStyle}
+          icon={recordingStatus === 'recording' ? StopIcon : MicrophoneIcon}
+          onPress={handleRecordPress}
+          isPressed={isProcessing}
         />
-      </Animated.View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  outerContainer: {
-    marginVertical: 5,
-    alignItems: 'center',
-  },
   container: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: 'row', 
+    justifyContent: 'space-around',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'white',
     borderRadius: 10,
     padding: 10,
-    width: '100%',
+    marginVertical: 5,
   },
-  recordingText: {
-    color: 'black',
-    fontWeight: 'bold',
-    marginRight: 15,
-    fontSize: 16,
-  },
+  webUnsupportedText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    textAlign: 'center',
+    padding: 10,
+  }
 });
 
 export default SpeechButtonBox;

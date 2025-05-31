@@ -1,11 +1,11 @@
-const express = require('express');
-const cors = require('cors');
-// const connectDB = require('./config/db.js');
-const recordRoutes = require('./routes/recordRoutes.js');
-const textTransRoutes = require('./routes/textTransRoutes.js');
-const speechTransRoutes = require('./routes/speechTransRoutes.js');
-const dotenv = require('dotenv');
-const bodyParser = require('body-parser');
+import express from 'express';
+import cors from 'cors';
+// import connectDB from './config/db.js';
+import recordRoutes from './routes/recordRoutes.js';
+import textTransRoutes from './routes/textTransRoutes.js';
+import speechTransRoutes from './routes/speechTransRoutes.js';
+import dotenv from 'dotenv';
+import bodyParser from 'body-parser';
 
 dotenv.config();
 
@@ -18,7 +18,13 @@ const app = express();
 app.use(cors({
   origin: '*', // 允许所有来源
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Appid', 
+    'X-Timestamp', 
+    'X-Sign'
+  ]
 }));
 
 app.use(express.json({ limit: '10mb' }));
@@ -35,5 +41,7 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});module.exports = app;
+});
+
+export default app;
 

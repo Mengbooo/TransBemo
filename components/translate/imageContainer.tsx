@@ -1,8 +1,9 @@
 //! 图片容器组件，用于显示图片,但是直接复制的outputbox.tsx,需要修改
 
 import React, { useState } from "react";
-import { View, Image, StyleSheet, Text, TouchableOpacity } from "react-native";
-import * as ImagePicker from 'expo-image-picker';
+import { View, Image, StyleSheet, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import { pickImageFromLibrary } from "@/utils/imageUtils";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
 interface ImageContainerProps {
   onImageSelected?: (uri: string) => void;
@@ -10,30 +11,52 @@ interface ImageContainerProps {
 
 const ImageContainer: React.FC<ImageContainerProps> = ({ onImageSelected }) => {
   const [image, setImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const pickImage = async () => {
+  const handlePickImage = async () => {
     try {
-      // 模拟图片选择，实际应用中将使用ImagePicker
-      const tempImageUri = "https://c-ssl.dtstatic.com/uploads/blog/202207/01/20220701162816_cb3cf.thumb.1000_0.jpeg";
-      setImage(tempImageUri);
+      setLoading(true);
+      const result = await pickImageFromLibrary();
       
-      if (onImageSelected) {
-        onImageSelected(tempImageUri);
+      if (result && result.uri) {
+        setImage(result.uri);
+        
+        if (onImageSelected) {
+          onImageSelected(result.uri);
+        }
       }
     } catch (error) {
       console.error("选择图片失败:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <View style={styles.box}>
-      {image ? (
-        <View style={styles.imageContainer}>
-          <Text style={styles.text}>已选择图片: {image}</Text>
+    <View style={styles.container}>
+      {loading ? (
+        <View style={styles.processingContainer}>
+          <ActivityIndicator size="small" color="white" />
+          <Text style={styles.processingText}>正在处理图片...</Text>
+        </View>
+      ) : image ? (
+        <View style={styles.contentContainer}>
+          <Image 
+            source={{ uri: image }} 
+            style={styles.image} 
+            resizeMode="contain"
+          />
         </View>
       ) : (
-        <TouchableOpacity onPress={pickImage} style={styles.imagePlaceholder}>
-          <Text style={styles.text}>点击选择图片</Text>
+        <TouchableOpacity 
+          style={styles.touchableArea}
+          onPress={handlePickImage}
+          activeOpacity={0.7}
+        >
+          <View style={styles.placeholderContainer}>
+            <FontAwesome5 name="image" size={24} color="rgba(255, 255, 255, 0.5)" />
+            <Text style={styles.placeholder}>点击选择或拍摄图片</Text>
+          </View>
         </TouchableOpacity>
       )}
     </View>
@@ -41,33 +64,50 @@ const ImageContainer: React.FC<ImageContainerProps> = ({ onImageSelected }) => {
 };
 
 const styles = StyleSheet.create({
-  box: {
+  container: {
     flex: 1,
     borderWidth: 1,
     borderColor: "white",
     borderRadius: 10,
     padding: 10,
     marginVertical: 5,
+    justifyContent: "center",
+    minHeight: 100,
+  },
+  contentContainer: {
+    flex: 1,
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+  },
+  touchableArea: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderContainer: {
     alignItems: "center",
     justifyContent: "center",
   },
-  text: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
+  placeholder: {
+    color: "rgba(255, 255, 255, 0.5)",
+    marginTop: 10,
     textAlign: "center",
   },
-  imageContainer: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+  processingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  imagePlaceholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+  processingText: {
+    color: "white",
+    marginLeft: 10,
   },
 });
 
