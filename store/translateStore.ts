@@ -25,6 +25,7 @@ interface TextTranslateState extends BaseTranslateState {
 // 图片翻译状态
 interface ImageTranslateState extends BaseTranslateState {
   imageUri: string | null;
+  sourceText: string;
 }
 
 // 语音翻译状态
@@ -66,6 +67,7 @@ type TranslateState = {
   // 图片翻译方法
   setImageUri: (uri: string | null) => void;
   setImageOutputText: (text: string) => void;
+  setImageSourceText: (text: string) => void;
   setImageSourceLanguage: (lang: string) => void;
   setImageTargetLanguage: (lang: string) => void;
   handleImageLanguageChange: (newSource: string, newTarget: string) => void;
@@ -107,6 +109,7 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     outputText: '',
     sourceLanguage: '中文',
     targetLanguage: '英语',
+    sourceText: '',
   },
   
   speechTranslate: {
@@ -153,6 +156,10 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
   
   setImageOutputText: (text) => set((state) => ({
     imageTranslate: { ...state.imageTranslate, outputText: text }
+  })),
+  
+  setImageSourceText: (text) => set((state) => ({
+    imageTranslate: { ...state.imageTranslate, sourceText: text }
   })),
   
   setImageSourceLanguage: (lang) => set((state) => ({
@@ -406,9 +413,15 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
       const { sourceLanguage, targetLanguage } = imageTranslate;
 
       if (!imageUri) {
-        console.error('图片URI不能为空');
+        console.error('【错误】图片翻译 - 图片URI不能为空');
         return;
       }
+      
+      console.log('【调试】图片翻译 - 开始处理:', { 
+        sourceLanguage, 
+        targetLanguage,
+        imageUriPrefix: imageUri.substring(0, 30) + '...'
+      });
       
       // 设置加载状态
       set((state) => ({
@@ -424,23 +437,32 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
       
       // 将图片URI转换为Blob
       const imageBlob = await uriToBlob(imageUri);
+      console.log('【调试】图片翻译 - 图片转换为Blob:', { 
+        size: `${(imageBlob.size / 1024).toFixed(2)}KB`,
+        type: imageBlob.type
+      });
       
       // 调用图片翻译API
+      const startTime = Date.now();
       const result = await translateImageRequest(
         imageBlob,
         sourceLanguageKey,
         targetLanguageKey,
         1 // 使用整图贴合模式
       );
+      const endTime = Date.now();
+      console.log(`【调试】图片翻译 - 总耗时: ${endTime - startTime}ms`);
       
       if (result.data.error_code === "0" && result.data.data) {
         // 获取翻译结果
         const { sumSrc, sumDst, pasteImg } = result.data.data;
+        console.log('【调试】图片翻译 - 翻译成功');
         
         set((state) => ({
           imageTranslate: { 
             ...state.imageTranslate, 
             outputText: sumDst,
+            sourceText: sumSrc || "",
             // 如果有贴合图片，可以保存
             // pasteImgBase64: pasteImg
           }
@@ -457,16 +479,20 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
       } else {
         // 处理错误
         const errorMessage = result.data.error_msg || "图片翻译失败";
+        console.error('【错误】图片翻译 - API返回错误:', {
+          error_code: result.data.error_code,
+          error_msg: errorMessage
+        });
+        
         set((state) => ({
           imageTranslate: { 
             ...state.imageTranslate, 
             outputText: `错误: ${errorMessage}`
           }
         }));
-        console.error('图片翻译返回错误:', result.data);
       }
     } catch (error) {
-      console.error('图片翻译失败:', error);
+      console.error('【错误】图片翻译失败:', error);
       set((state) => ({
         imageTranslate: { 
           ...state.imageTranslate, 

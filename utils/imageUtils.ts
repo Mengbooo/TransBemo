@@ -192,7 +192,7 @@ export const getImageSize = async (uri: string): Promise<{ width: number; height
       img.onerror = reject;
       img.src = uri;
     } else {
-      // 使用默认尺寸，实际应用中可能需要使用第三方库如react-native-image-size
+      // 使用默认尺寸
       resolve({ width: 800, height: 600 });
     }
   });
@@ -205,22 +205,49 @@ export const getImageSize = async (uri: string): Promise<{ width: number; height
  */
 export const uriToBlob = async (uri: string): Promise<Blob> => {
   try {
+    console.log('【调试】图片处理 - URI转Blob开始:', uri.substring(0, 30) + '...');
+    
     if (Platform.OS === 'web') {
       // Web平台直接fetch
       const response = await fetch(uri);
-      return await response.blob();
+      const blob = await response.blob();
+      console.log('【调试】图片处理 - Web平台转换成功:', { size: `${(blob.size / 1024).toFixed(2)}KB` });
+      return blob;
     } else {
-      // React Native需要先读取文件再转换
-      const base64 = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-      
-      // 在Web环境中（如果使用React Native Web）
-      const response = await fetch(`data:image/jpeg;base64,${base64}`);
-      return await response.blob();
+      // 移动平台处理
+      try {
+        // 读取文件为Base64
+        console.log('【调试】图片处理 - 读取文件为Base64');
+        const base64 = await FileSystem.readAsStringAsync(uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        
+        console.log('【调试】图片处理 - Base64读取成功:', { length: base64.length });
+        
+        // 直接返回一个包含base64数据的对象
+        // 这不是真正的Blob，但包含我们需要的数据和方法
+        return {
+          size: base64.length,
+          type: 'image/jpeg',
+          text: async () => base64,
+          arrayBuffer: async () => {
+            // 如果需要arrayBuffer，可以在这里实现
+            throw new Error('arrayBuffer not implemented');
+          },
+          stream: () => {
+            throw new Error('stream not implemented');
+          },
+          slice: () => {
+            throw new Error('slice not implemented');
+          }
+        } as unknown as Blob;
+      } catch (fsError) {
+        console.error('【错误】图片处理 - 读取文件失败:', fsError);
+        throw fsError;
+      }
     }
   } catch (error) {
-    console.error('URI转Blob错误:', error);
+    console.error('【错误】图片处理 - URI转Blob错误:', error);
     throw error;
   }
 };

@@ -1,7 +1,7 @@
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import TranslateBase from "@/components/global/TranslateBase";
 import OutputTextComponent from "@/components/translate/OutputBox";
-import ImageButtonBox from "@/components/translate/ImageButtonBox";
+import SourceTextBox from "@/components/translate/SourceTextBox";
 import ImageContainer from "@/components/translate/imageContainer";
 import LanguageSwitcher from "@/components/translate/LanguageSwitcher";
 import { useTranslateStore } from "@/store/translateStore";
@@ -15,16 +15,17 @@ export default function imageTransPage() {
     translateImage
   } = useTranslateStore();
   
-  const { outputText, sourceLanguage, targetLanguage, imageUri } = imageTranslate;
+  const { outputText, sourceText, sourceLanguage, targetLanguage, imageUri } = imageTranslate;
   const [isTranslating, setIsTranslating] = useState(false);
 
   const handleImageSelected = async (uri: string) => {
     setImageUri(uri);
     setIsTranslating(true);
+    console.log('【调试】图片翻译 - 开始处理图片:', uri.substring(0, 30) + '...');
     try {
       await translateImage(uri);
     } catch (error) {
-      console.error("翻译图片出错:", error);
+      console.error("【错误】图片翻译失败:", error);
     } finally {
       setIsTranslating(false);
     }
@@ -32,10 +33,20 @@ export default function imageTransPage() {
 
   return (
     <TranslateBase>
-      <View style={styles.textContainer}>
-        <OutputTextComponent inputText={isTranslating ? "正在翻译中..." : outputText} />
-        <ImageContainer onImageSelected={handleImageSelected} />
-        <ImageButtonBox />
+      <View style={styles.container}>
+        <View style={styles.textSection}>
+          <View style={styles.sourceTextWrapper}>
+            <SourceTextBox 
+              sourceText={isTranslating ? "识别中..." : (sourceText || "未识别到文字")} 
+            />
+          </View>
+          <View style={styles.outputTextWrapper}>
+            <OutputTextComponent inputText={isTranslating ? "正在翻译中..." : outputText} />
+          </View>
+        </View>
+        <View style={styles.imageSection}>
+          <ImageContainer onImageSelected={handleImageSelected} />
+        </View>
         <View style={styles.switcherContainer}>
           <LanguageSwitcher
             sourceLanguage={sourceLanguage}
@@ -43,7 +54,6 @@ export default function imageTransPage() {
             onLanguageChange={handleImageLanguageChange}
           />
         </View>
-        
         {isTranslating && (
           <View style={styles.loadingOverlay}>
             <ActivityIndicator size="large" color="white" />
@@ -55,20 +65,29 @@ export default function imageTransPage() {
 }
 
 const styles = StyleSheet.create({
-  text: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-  },
-  textContainer: {
+  container: {
     flex: 1,
     width: "90%",
     marginTop: 20,
     justifyContent: "space-between",
     position: "relative",
   },
+  textSection: {
+  },
+  sourceTextWrapper: {
+    height: 80,
+    marginBottom: 5,
+  },
+  outputTextWrapper: {
+    height: 100,
+    marginBottom: 5,
+  },
+  imageSection: {
+    flex: 1.5,
+    marginBottom: 5,
+  },
   switcherContainer: {
-    marginTop: "auto",
+    height: 50,
     paddingVertical: 5,
     overflow: "hidden",
     width: "100%",
