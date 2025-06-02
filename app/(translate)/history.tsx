@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, Touchable
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useEffect, useState } from 'react';
 
-import HistoryItem from '@/components/translate/HistoryItem';
+import HistoryItem from '@/components/translate/historyItem';
 import logo from "@/assets/images/logo.png";
 import translateCommonStyles from '@/styles/translateCommonStyles';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
