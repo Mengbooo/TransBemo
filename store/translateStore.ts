@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { translateTextRequest } from '@/api/textTransRequest';
 import { translateImageRequest } from '@/api/imageTransRequest';
 import { translateSpeechRequest } from '@/api/speechTransRequest';
+import { getRecordsRequest, saveRecordRequest, deleteRecordRequest, clearRecordsRequest } from '@/api/recordsApi';
 import { languagesLabelTemp } from '@/constants/Languages';
 import { pickImageFromLibrary, captureImageWithCamera, uriToBlob } from '@/utils/imageUtils';
 import { startRecording, stopRecording, audioToBase64, playAudio, isRecordingSupported } from '@/utils/audioUtils';
@@ -38,6 +39,7 @@ interface SpeechTranslateState extends BaseTranslateState {
 
 // 翻译历史记录项
 interface HistoryItem {
+  _id?: string;
   source: string;
   target: string;
   inputText: string;
@@ -55,6 +57,7 @@ type TranslateState = {
   
   // 翻译历史
   translationHistory: HistoryItem[];
+  isLoadingHistory: boolean;
   
   // 文本翻译方法
   setTextInputText: (text: string) => void;
@@ -90,6 +93,11 @@ type TranslateState = {
   playOriginalAudio: () => Promise<void>;
   playTranslatedAudio: () => Promise<void>;
   
+  // 历史记录方法
+  loadHistory: () => Promise<void>;
+  deleteHistoryItem: (id: string) => Promise<void>;
+  clearHistory: () => Promise<void>;
+  
   // 通用方法
   getLanguageKey: (languageValue: string) => string | null;
   addToHistory: (item: Omit<HistoryItem, 'timestamp'>) => void;
@@ -123,6 +131,7 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
   },
   
   translationHistory: [],
+  isLoadingHistory: false,
   
   // 文本翻译方法
   setTextInputText: (text) => set((state) => ({
@@ -512,10 +521,60 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     return null;
   },
   
-  addToHistory: (item) => set((state) => ({
-    translationHistory: [
-      { ...item, timestamp: Date.now() },
-      ...state.translationHistory
-    ]
-  })),
+  addToHistory: async (item) => {
+    const timestamp = Date.now();
+    
+    // 添加到本地状态
+    set((state) => ({
+      translationHistory: [
+        { ...item, timestamp },
+        ...state.translationHistory
+      ]
+    }));
+    
+    // 保存到数据库
+    try {
+      await saveRecordRequest({
+        ...item,
+        timestamp
+      });
+    } catch (error) {
+      console.error('保存记录到数据库失败:', error);
+    }
+  },
+  
+  // 历史记录方法
+  loadHistory: async () => {
+    try {
+      set({ isLoadingHistory: true });
+      const records = await getRecordsRequest();
+      set({ 
+        translationHistory: records,
+        isLoadingHistory: false
+      });
+    } catch (error) {
+      console.error('加载历史记录失败:', error);
+      set({ isLoadingHistory: false });
+    }
+  },
+  
+  deleteHistoryItem: async (id) => {
+    try {
+      await deleteRecordRequest(id);
+      set((state) => ({
+        translationHistory: state.translationHistory.filter(item => item._id !== id)
+      }));
+    } catch (error) {
+      console.error('删除历史记录失败:', error);
+    }
+  },
+  
+  clearHistory: async () => {
+    try {
+      await clearRecordsRequest();
+      set({ translationHistory: [] });
+    } catch (error) {
+      console.error('清空历史记录失败:', error);
+    }
+  },
 }));

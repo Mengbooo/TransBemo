@@ -19,7 +19,7 @@ export const IMAGE_TRANSLATE_API = `${API_BASE_URL}/api/translateImage`;
 export const SPEECH_TRANSLATE_API = `${API_BASE_URL}/api/translateSpeech`;
 
 // 历史记录API地址
-export const HISTORY_API = `${API_BASE_URL}/api/history`;
+export const HISTORY_API = `${API_BASE_URL}/api/records`;
 
 // 是否使用本地IP (用于调试)
 export const USE_LOCAL_IP = true;

@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 // 定义历史记录项的类型
 type HistoryItemProps = {
@@ -9,6 +10,7 @@ type HistoryItemProps = {
   outputText: string;
   translationMethod: ReactNode;
   timestamp?: number; // 添加可选的时间戳属性
+  onDelete?: () => void; // 添加可选的删除回调
 };
 
 // 格式化时间戳
@@ -37,6 +39,7 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
   outputText,
   translationMethod,
   timestamp,
+  onDelete,
 }) => {
   const formattedTime = formatTimestamp(timestamp);
   
@@ -60,6 +63,11 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
       {timestamp && (
         <Text style={styles.timestamp}>{formattedTime}</Text>
       )}
+      {onDelete && (
+        <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
+          <MaterialCommunityIcons name="delete" size={20} color="white" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -79,7 +87,7 @@ const styles = StyleSheet.create({
   },
   Info: {
     flex: 1,
-    width: "100%",
+    width: "90%",
     flexDirection: "row",
     alignItems: "center", 
     justifyContent: "space-between", 
@@ -118,7 +126,12 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.5)',
     alignSelf: 'flex-end',
     marginTop: 8,
-  }
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 15,
+    right: 10,
+  },
 });
 
 export default HistoryItem;

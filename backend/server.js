@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-// import connectDB from './config/db.js';
+import connectDB from './config/db.js';
 import recordRoutes from './routes/recordRoutes.js';
 import textTransRoutes from './routes/textTransRoutes.js';
 import speechTransRoutes from './routes/speechTransRoutes.js';
@@ -13,7 +13,7 @@ dotenv.config();
 const app = express();
 
 // 连接数据库
-// connectDB();
+connectDB();
 
 // 中间件
 app.use(cors({
