@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { TRANSLATE_API } from '../utils/apiConfig';
 
 // 定义翻译请求函数
 export const translateTextRequest = async (
@@ -15,7 +16,7 @@ export const translateTextRequest = async (
     };
 
     // 发起 POST 请求到后端接口
-    const response = await axios.post('http://localhost:5000/api/translateText', requestBody);
+    const response = await axios.post(`${TRANSLATE_API}`, requestBody);
     console.log(response);
     return response;
 

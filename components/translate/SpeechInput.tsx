@@ -42,7 +42,7 @@ const SpeechInput: React.FC<SpeechInputProps> = ({
                 style={styles.playButton} 
                 onPress={playOriginalAudio}
               >
-                <FontAwesome5 name="play-circle" size={20} color="rgba(255, 255, 255, 0.7)" />
+                <FontAwesome5 name="play-circle" size={20} color="white" />
               </TouchableOpacity>
             </>
           )}
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     position: "absolute",
-    bottom: 0,
+    bottom: 5,
     left: 0,
     right: 0,
     height: 1,

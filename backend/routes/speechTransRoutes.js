@@ -2,6 +2,7 @@ import express from 'express';
 import axios from 'axios';
 import md5 from 'md5';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -11,50 +12,71 @@ const router = express.Router();
 const appid = process.env.APPID;
 const appkey = process.env.APPKEY;
 
-// 检查环境变量是否设置
-if (!appid || !appkey) {
-  console.error("APPID 或 APPKEY 未设置，请检查环境变量");
-}
-
-// 语音识别和翻译相关路由
-router.post('/recognize', async (req, res) => {
-  try {
-    // 这里是语音识别的处理逻辑
-    // 待实现
-    res.json({ message: '语音识别功能待实现' });
-  } catch (error) {
-    console.error('语音识别出错:', error);
-    res.status(500).json({ error: '语音识别请求出错' });
-  }
-});
-
 // 语音翻译接口
-router.post("/translate", async (req, res) => {
+router.post("/translateSpeech", async (req, res) => {
+  console.log("【调试】后端语音翻译 - 收到请求");
+  console.log("【调试】后端语音翻译 - 请求方法:", req.method);
+  console.log("【调试】后端语音翻译 - 请求URL:", req.originalUrl);
+  console.log("【调试】后端语音翻译 - 请求头:", req.headers);
+  
   try {
     // 从请求体中获取参数
     const { from, to, voice, format } = req.body;
     
-    // 请求头中的参数
-    const timestamp = req.headers["x-timestamp"];
-    const clientSign = req.headers["x-sign"];
+    console.log("【调试】后端语音翻译 - 请求体参数:", { 
+      from, 
+      to, 
+      format, 
+      voiceLength: voice ? voice.length : 0,
+      voiceBase64Prefix: voice ? voice.substring(0, 30) + '...' : 'undefined'
+    });
     
     // 验证请求体参数
     if (!from || !to || !voice || !format) {
+      console.error("【错误】后端语音翻译 - 参数验证失败:", { from, to, hasVoice: !!voice, format });
       return res.status(400).json({ 
         code: 10001, 
         msg: "必填参数为空或固定参数有误" 
       });
     }
     
-    // 生成签名（在实际项目中应该再次验证请求签名）
+    // 生成时间戳 - 使用秒级时间戳
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    console.log("【调试】后端语音翻译 - 时间戳:", timestamp);
+    
+    // 根据百度API文档计算签名
+    // 签名计算方法：hmac_sha256(appid+timestamp+voice, appkey)，并进行base64编码
+    console.log("【调试】后端语音翻译 - 签名计算参数:", { 
+      appid, 
+      timestamp, 
+      voiceLength: voice.length ,
+      type: typeof voice
+    });
+    
+    // 拼接签名字符串
+    const signStr = appid + timestamp + voice;
+    
+    // 使用hmac_sha256算法生成签名
+    const hmac = crypto.createHmac('sha256', appkey);
+    hmac.update(signStr);
+    const sign = hmac.digest('base64');
+    
+    console.log("【调试】后端语音翻译 - 生成签名:", sign.substring(0, 20) + '...');
     
     // 设置百度API请求头
     const headers = {
       "Content-Type": "application/json",
       "X-Appid": appid,
-      "X-Timestamp": timestamp || Math.floor(Date.now() / 1000).toString(),
-      "X-Sign": clientSign || "dummy-sign-for-testing"
+      "X-Timestamp": timestamp,
+      "X-Sign": sign
     };
+    
+    console.log("【调试】后端语音翻译 - 发送到百度API的请求头:", {
+      "Content-Type": "application/json",
+      "X-Appid": appid,
+      "X-Timestamp": timestamp,
+      "X-Sign": sign
+    });
     
     // 构建请求体
     const requestBody = {
@@ -64,27 +86,52 @@ router.post("/translate", async (req, res) => {
       format
     };
     
+    console.log("【调试】后端语音翻译 - 请求体:", { 
+      from, 
+      to, 
+      format,
+      voiceLength: voice.length
+    });
+    
+    console.log("【调试】后端语音翻译 - 发送请求到百度API");
+    console.log("【调试】后端语音翻译 - 请求URL: https://fanyi-api.baidu.com/api/trans/v2/voicetrans");
+    
     // 调用百度API
+    const startTime = Date.now();
+    console.log("【调试】后端语音翻译 - 开始请求百度API, 时间:", new Date(startTime).toISOString());
+    
     const response = await axios.post(
       "https://fanyi-api.baidu.com/api/trans/v2/voicetrans",
       requestBody,
       { headers }
     );
     
+    const endTime = Date.now();
+    console.log(`【调试】后端语音翻译 - 百度API请求耗时: ${endTime - startTime}ms`);
+    console.log("【调试】后端语音翻译 - 百度API响应状态:", response.status);
+    console.log("【调试】后端语音翻译 - 百度API响应头:", response.headers);
+    console.log("【调试】后端语音翻译 - 百度API响应数据:", response.data);
+    
     // 返回翻译结果
     res.json(response.data);
   } catch (error) {
-    console.error("语音翻译请求出错:", error);
+    console.error("【错误】后端语音翻译请求出错:", error.message);
     
     // 如果有错误响应信息，则转发
     if (error.response && error.response.data) {
+      console.error("【错误】后端语音翻译 - 百度API错误响应:", {
+        status: error.response.status,
+        headers: error.response.headers,
+        data: error.response.data
+      });
       return res.status(error.response.status).json(error.response.data);
     }
     
     // 通用错误处理
     res.status(500).json({ 
       code: 20200, 
-      msg: "语音翻译请求失败" 
+      msg: "语音翻译请求失败",
+      error: error.message
     });
   }
 });

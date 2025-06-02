@@ -9,26 +9,27 @@ import { Platform } from 'react-native';
 // 录音配置
 const recordingOptions = {
   android: {
-    extension: '.m4a',
-    outputFormat: Audio.AndroidOutputFormat.MPEG_4,
-    audioEncoder: Audio.AndroidAudioEncoder.AAC,
+    extension: '.pcm',
+    outputFormat: Audio.AndroidOutputFormat.DEFAULT,
+    audioEncoder: Audio.AndroidAudioEncoder.DEFAULT,
     sampleRate: 16000,
     numberOfChannels: 1,
-    bitRate: 128000,
+    bitRate: 16000 * 16,
   },
   ios: {
-    extension: '.wav',
+    extension: '.pcm',
     audioQuality: Audio.IOSAudioQuality.HIGH,
     sampleRate: 16000,
     numberOfChannels: 1,
-    bitRate: 128000,
+    bitRate: 16000 * 16,
     linearPCMBitDepth: 16,
     linearPCMIsBigEndian: false,
     linearPCMIsFloat: false,
+    outputFormat: Audio.IOSOutputFormat.LINEARPCM,
   },
   web: {
     mimeType: 'audio/webm',
-    audioBitsPerSecond: 128000,
+    audioBitsPerSecond: 16000 * 16,
   }
 };
 

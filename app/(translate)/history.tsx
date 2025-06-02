@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'black'
   },
   scrollView: {
-    marginTop: 10,
+    marginTop: 20,
     flex: 1,
     width: '95%' 
   },

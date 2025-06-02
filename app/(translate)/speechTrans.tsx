@@ -32,17 +32,20 @@ export default function SpeechTransPage() {
             recordingStatus={recordingStatus} 
           />
           
-          <OutputTextComponent inputText={outputText} />
-          
-          {targetAudioBase64 && (
-            <TouchableOpacity 
-              style={styles.translatedAudioButton} 
-              onPress={playTranslatedAudio}
-            >
-              <FontAwesome5 name="play" size={18} color="white" />
-              <Text style={styles.audioButtonText}>播放译文语音</Text>
-            </TouchableOpacity>
-          )}
+          <OutputTextComponent 
+            inputText={outputText} 
+            hasAudio={!!targetAudioBase64}
+            playButton={
+              targetAudioBase64 ? (
+                <TouchableOpacity 
+                  style={styles.playButton} 
+                  onPress={playTranslatedAudio}
+                >
+                  <FontAwesome5 name="play-circle" size={20} color="white" />
+                </TouchableOpacity>
+              ) : undefined
+            }
+          />
           
           <SpeechButtonBox />
           
@@ -77,19 +80,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     width: "100%",
   },
-  translatedAudioButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "center",
-    marginVertical: 5,
-  },
-  audioButtonText: {
-    color: "white",
-    marginLeft: 8,
-    fontWeight: "500",
+  playButton: {
+    position: "absolute",
+    bottom: 5,
+    left: 5,
+    padding: 3,
   },
 });

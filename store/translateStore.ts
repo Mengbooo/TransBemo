@@ -283,10 +283,7 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
       }
       
       // 获取音频格式
-      const format = audioUri.endsWith('.wav') ? 'wav' 
-                   : audioUri.endsWith('.amr') ? 'amr' 
-                   : audioUri.endsWith('.m4a') ? 'm4a' 
-                   : 'pcm';
+      const format = 'pcm'; // 强制使用PCM格式，与audioUtils设置匹配
       
       // 发送语音翻译请求
       const response = await translateSpeechRequest(base64Audio, fromLang, toLang, format);
