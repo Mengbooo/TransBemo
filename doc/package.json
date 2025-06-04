@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "dependencies": {
+    "markdown-it-mermaid": "^0.2.5",
+    "mermaid": "^11.6.0",
+    "vitepress": "^1.6.3",
+    "vue": "^3.5.16"
+  }
+}

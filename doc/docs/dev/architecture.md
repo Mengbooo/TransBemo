@@ -17,29 +17,34 @@ TransBemo是一个基于Expo开发的多语言翻译应用，支持文本翻译�
 
 ```mermaid
 flowchart TD
-    subgraph client["客户端 (Expo/React Native)"]
-        subgraph modules["翻译模块"]
-            text["文本翻译模块"]
-            image["图片翻译模块"]
-            speech["语音翻译模块"]
-        end
-        state["状态管理层\n(Zustand)"]
+    client["客户端 (Expo/React Native)"]
+    server["服务端 (Express.js)"]
+    
+    subgraph client
+        modules["翻译模块"]
+        state["状态管理层(Zustand)"]
         api["API 接口层"]
-        modules --> state
-        state --> api
     end
     
-    subgraph server["服务端 (Express.js)"]
+    subgraph modules
+        text["文本翻译模块"]
+        image["图片翻译模块"]
+        speech["语音翻译模块"]
+    end
+    
+    subgraph server
         route["路由控制层"]
         controller["控制器层"]
         service["服务层"]
-        external["外部API集成\n(百度翻译API等)"]
-        route --> controller
-        controller --> service
-        service --> external
+        external["外部API集成(百度翻译API等)"]
     end
     
+    modules --> state
+    state --> api
     api --> route
+    route --> controller
+    controller --> service
+    service --> external
 ```
 
 ### 1.2 架构设计原则

@@ -1,0 +1,39 @@
+/* 自定义样式 */
+:root {
+  --vp-c-brand: #646cff;
+  --vp-c-brand-light: #747bff;
+}
+
+/* Mermaid图表样式 */
+.mermaid {
+  text-align: center;
+  margin: 2rem auto;
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+/* 黑暗模式下的Mermaid图表 */
+.dark .mermaid {
+  background-color: #1e1e1e;
+}
+
+/* 改进代码块样式 */
+div[class*='language-'] {
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+/* 自定义首页样式 */
+.VPHero .name,
+.VPHero .text {
+  font-weight: bold;
+}
+
+.VPFeature {
+  transition: transform 0.2s ease;
+}
+
+.VPFeature:hover {
+  transform: translateY(-5px);
+} 
